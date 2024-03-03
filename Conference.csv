@@ -1,0 +1,21 @@
+Conference_ID,Name,Topic,Location,StartDate,EndDate,EventFormat
+209,IEEE International Conference on Robotics and Automation,Machine Learning,Paris_France,7/14/2023,7/17/2023,In-person
+299,IEEE International Conference on Artificial Intelligence,Artificial Intelligence,Berlin_Germany,10/2/2023,10/5/2023,In-person
+204,IEEE International Conference on Cloud Engineering,Cloud Computing,Rome_Italy,4/28/2023,5/1/2023,In-person
+240,IEEE Conference on Cyber Security and Cloud Computing,Cybersecurity,Rome_Italy,7/2/2023,7/5/2023,In-person
+253,IEEE International Conference on Internet of Things,IoT,Toronto_Canada,7/30/2023,8/2/2023,In-person
+276,IEEE Conference on Machine Learning and Applications,Machine Learning,Berlin_Germany,7/14/2023,7/17/2023,In-person
+219,IEEE International Conference on Intelligent Systems,Artificial Intelligence,Toronto_Canada,12/18/2023,12/21/2023,Online
+207,IEEE International Conference on Industrial IoT and Big Data,IoT,Moscow_Russia,9/2/2023,9/5/2023,Online
+242,IEEE Conference on Computational Intelligence and Games,Artificial Intelligence,London_UK,9/12/2023,9/15/2023,Online
+206,IEEE International Conference on Dependable Systems and Networks,Cybersecurity,Berlin_Germany,9/22/2023,9/25/2023,Online
+232,IEEE International Conference on Pattern Recognition,Image processing,Berlin_Germany,2/28/2023,3/3/2023,Online
+248,IEEE International Conference on Cloud Computing ,Cloud Computing,Dubai_UAE,8/20/2023,8/23/2023,Online
+267,IEEE International Conference on Tools with Artificial Intelligence,Artificial Intelligence,Tokyo_Japan,9/11/2023,9/14/2023,In-person
+234,IEEE International Conference on Internet of Things Design and Implementation,IoT,New York_USA,10/21/2023,10/24/2023,In-person
+269,IEEE Conference on Communications and Network Security,Cybersecurity,Moscow_Russia,3/31/2023,4/3/2023,Online
+294,IEEE International Conference on Blockchain and Cryptocurrency,BlockChain,Toronto_Canada,11/18/2023,11/21/2023,Online
+268,IEEE International Conference on Machine Learning and Applications,Machine Learning,Toronto_Canada,5/28/2023,5/31/2023,Online
+277,IEEE International Conference on Wireless Communications,IoT,Berlin_Germany,2/3/2024,2/6/2024,Online
+233,IEEE Conference on Computer Vision and Pattern Recognition,Artificial Intelligence,Moscow_Russia,1/17/2024,1/20/2024,In-person
+286,IEEE International Conference on Data Science and Advanced Analytics,Artificial Intelligence,Moscow_Russia,8/8/2023,8/11/2023,In-person
