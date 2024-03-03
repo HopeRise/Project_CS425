@@ -1,18 +1,29 @@
 -- Active: 1705953318753@@127.0.0.1@3306@project_cs425
 
 --indexes;
-Create index index_name on publication(topic);
+Create index index_Topic on publication(topic);
 show index FROM publication;
+
+create index index_Last_Name on Authors(LastName);
+show index FRom authors
+
+Create index 
 
 --views;
 
-CREATE view AI_pod_ep_70 as
-Select p.Topic, e.ep_num
+CREATE view BC_pod_ep_70 as
+Select p.Topic, e.EpisodeNumber
 from publication p, podcastepisode e
-where p.PublicationID=e.PublicationID and p.topic = "Blockchain" and e.Ep_num >70;
+where p.PublicationID=e.PublicationID and p.topic = "Blockchain" and e.EpisodeNumber >70;
 
-SELECT * FROM AI_pod_ep_70
+SELECT * FROM BC_pod_ep_70
 
+CREATE view pub_book AS
+select p.Topic, b.ChapterNumbers
+from publication p, book b
+where b.PublicationID=p.PublicationID and p.Topic='Cloud Computing' and b.ChapterNumbers>20;
+
+SELECT * from pub_book
 
 --triggers;
 
@@ -66,15 +77,28 @@ create table JournalArticle(
 );
 
 create table PodcastEpisode(
+    PublicationID int,    
     AuthorsID int,
-    PublicationID int,
-    Ep_name varchar(300),
-    Ep_num int,
+    EpisodeName varchar(1000),
+    EpisodeNumber int,
     Duration int,
     primary KEY (AuthorsID, PublicationID),
     Foreign Key (AuthorsID) REFERENCES Authors(AuthorsID),
     Foreign Key (PublicationID) REFERENCES Publication(PublicationID)
 );
+
+--some of the data was not imported T_T;
+Insert Podcastepisode(PublicationID,AuthorsID,EpisodeName,EpisodeNumber,Duration)
+Values ('156','46', 'Machine Learning: From Algorithms to Practical Applications', '94', '23'),
+('105','58', 'Machine Learning: From Algorithms to Practical ApplicationsBlockchain Beyond Bitcoin: Exploring Diverse Applications', '77', '31'),
+('112','19', 'Demystifying Cyber Security: The Essential Guide for Modern Businesses', '16', '31'),
+('105','58','Blockchain: Beyond Cryptocurrencies, Revolutionizing Industries', '58','35'),
+('170',54, 'Blockchain and Identity: The Future of Digital IDs','16','66'),
+('151', '47', 'Building the Connected Home: IoT and Home Automation','59','25');
+
+()
+
+
 
 
 create table Book(
