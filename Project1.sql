@@ -32,9 +32,65 @@ SELECT * from pub_book
 
 
 --stored porcedure;
+Create Procedure Authors_Total_Books(In Authors_ID Int)
+Begin 
+
+    Declare Book_Total Int;
+
+    Select Count(AuthorsID) Into Book_Total From Book
+    Where AuthorsID = Authors_ID;
+
+    Select Concat('Total books for author ', Authors_ID, ': ', Book_Total);
+
+End
+
+Call Authors_Total_Books(10);
+
+Create Procedure Podcast_Duration_Time(In Duration_Number Int)
+Begin
+
+    Declare Podcast_Number Int;
+
+    Select Count(*) into Podcast_Number From PodcastEpisode
+    Where Duration > Duration_Number;
+
+    Select Concat('Number of podcast episodes greater than ', Duration_Number, ' minutes is/are: ', Podcast_Number);
+End
+
+Call Podcast_Duration_Time(30);
+
+Create Function Authors_Affiliation_Count(Affiliation_Name Varchar(400)) Returns Int
+DETERMINISTIC
+Begin
+
+    Declare author_count Int;
+
+    Select Count(AuthorsID) Into author_count From Authors
+    Where Affiliation = Affiliation_Name;
+
+    Return author_count;
+End
+
+Select Authors_Affiliation_Count('MIT') as author_count;
+
+Create Function Topic_Count(Topic_Name Varchar(255)) Returns Int  
+DETERMINISTIC
+Begin 
+
+    Declare Publication_Topic_Count Int;
+
+    Select Count(PublicationID) Into Publication_Topic_Count From Publication 
+    Where Topic = Topic_Name;
+
+    Return Publication_Topic_Count;
+
+End  
+
+Select Topic_Count('Blockchain') as Publication_Topic_Count;
 
 
---creating tables;
+
+
 
 Create table Publication(
     PublicationID INT,
@@ -120,4 +176,22 @@ create table AuthorConference(
     Foreign Key (AuthorsID) REFERENCES Authors(AuthorsID)
 );
 
+Select Count(AuthorsID) as total From Book;
 
+
+
+DELIMITER //
+CREATE TRIGGER additional_publications
+BEFORE INSERT ON authors
+FOR EACH ROW
+BEGIN
+    UPDATE authors
+    SET 
+    FirstName= NEW.FirstName,LastName= NEW.LastName, Affiliation = NEW.affiliation
+    ,PublicationType= NEW.PublicationType
+    WHERE authorsID = NEW.authorsID;
+END//
+DELIMITER ;
+insert into authors(AuthorsID, FirstName, LastName, Affiliation, PublicationType)
+values('100','Lina', 'Moore', 'USC','Book');
+select * from authors;
