@@ -113,7 +113,7 @@ create table Book(
 );
 
 
-create table PublicationConference(
+create table AuthorConference(
     AuthorsID int,
     PublicationID int,
     primary KEY (AuthorsID, PublicationID),
