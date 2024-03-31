@@ -1,13 +1,14 @@
 -- Active: 1705953318753@@127.0.0.1@3306@project_cs425
 
+USE Project_CS425;
+
+
 --indexes;
 Create index index_Topic on publication(topic);
 show index FROM publication;
 
 create index index_Last_Name on Authors(LastName);
 show index FRom authors
-
-Create index 
 
 --views;
 
@@ -152,10 +153,13 @@ Values ('156','46', 'Machine Learning: From Algorithms to Practical Applications
 ('170',54, 'Blockchain and Identity: The Future of Digital IDs','16','66'),
 ('151', '47', 'Building the Connected Home: IoT and Home Automation','59','25');
 
+<<<<<<< Updated upstream
 ()
 
 
 
+=======
+>>>>>>> Stashed changes
 
 create table Book(
     AuthorsID int,
@@ -176,6 +180,7 @@ create table AuthorConference(
     Foreign Key (AuthorsID) REFERENCES Authors(AuthorsID)
 );
 
+<<<<<<< Updated upstream
 Select Count(AuthorsID) as total From Book;
 
 
@@ -195,3 +200,32 @@ DELIMITER ;
 insert into authors(AuthorsID, FirstName, LastName, Affiliation, PublicationType)
 values('100','Lina', 'Moore', 'USC','Book');
 select * from authors;
+=======
+
+--The amount of publication types within each Topic;
+SELECT Topic, PublicationType, COUNT(PublicationType) AS Count
+FROM publication
+GROUP BY Topic, PublicationType WITH ROLLUP
+HAVING Topic IS NOT NULL AND PublicationType IS NOT NULL;
+
+-- Break into 5 groups of authors related to conference;
+Select AuthorsID, ConferenceID,
+NTILE(5) over (order by AuthorsID) AS 'Group of 5'
+From authorconference
+
+-- Average amount of page and chapter number with in each publisher;
+SELECT DISTINCT Publisher, 
+       ROUND(AVG(TotalPages) OVER (PARTITION BY Publisher), 2) AS AVGPages, ROUND(AVG(ChapterNumbers) OVER (PARTITION BY Publisher), 2) AS AVGChapters
+FROM book;
+
+-- Rank authors by the amount of conference they have done, first being the higest, last being the lowest;
+SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks
+FROM (
+    SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID
+    FROM authorconference
+    GROUP BY AuthorsID
+) AS AuthorTotals;
+
+
+
+>>>>>>> Stashed changes
