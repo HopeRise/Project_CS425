@@ -1,0 +1,7 @@
+{
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.project.referencedLibraries": [
+        "C:\\Users\\evett\\OneDrive\\school work\\CS425\\Project_CS425\\mysql-connector-j-8.3.0\\mysql-connector-j-8.3.0.jar"
+    ]
+}
+
