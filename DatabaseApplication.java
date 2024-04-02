@@ -101,6 +101,7 @@ public class DatabaseApplication {
             int rowsAffeccted = preparedStatement.executeUpdate();
 
             System.out.println("Rows affected: " + rowsAffeccted);
+            menu(connection);
 
         }catch(SQLException e){
             System.out.println("ERROR: Couldn't update attribute");
