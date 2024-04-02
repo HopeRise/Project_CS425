@@ -36,13 +36,13 @@ public class DatabaseApplication {
                     adding(connection);
                     break;
                 case 2:
-                    reading();
+                    reading(connection);
                     break;
                 case 3:
                     modifying(connection); // Pass the Connection object
                     break;
                 case 4:
-                    deleting();
+                    deleting(connection);
                     break;
                 case 5:
                     System.out.println("Connection closed Succesfully");
@@ -79,6 +79,7 @@ public class DatabaseApplication {
         return myConnection;
     }
 
+    //adding method 
     public static void adding(Connection connection) {
         try{       
             String insertQuery = "INSERT INTO book (AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher) VALUES (?, ?, ?, ?, ?)";
@@ -103,11 +104,12 @@ public class DatabaseApplication {
         }
     }
 
-    public static void reading() {
+    public static void reading(Connection connection) {
         System.out.println("yippie 2");
     }
 
-    public static void modifying(Connection connection) { // Accept Connection object as parameter
+    //updating database method
+    public static void modifying(Connection connection) { 
 
         try {
 
@@ -120,17 +122,35 @@ public class DatabaseApplication {
 
             int rowsAffeccted = preparedStatement.executeUpdate();
 
-            System.out.println("Rows affected: " + rowsAffeccted);
+            System.out.println("Database updated. \nRows affected: " + rowsAffeccted);
             menu(connection);
 
         }catch(SQLException e){
-            System.out.println("ERROR: Couldn't update attribute");
+            System.out.println("ERROR: " + e.getMessage());
             menu(connection);
         }
     }
 
-    public static void deleting() {
-        System.out.println("yippie 4");
+    //Deleting method
+    public static void deleting(Connection connection) {
+        
+        try{
+
+            String query = "delete from book where PublicationID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, 131);
+
+            int rowsAffeccted = preparedStatement.executeUpdate();
+
+            System.out.println("Successfully deleted. \nRows affected: " + rowsAffeccted);
+            menu(connection);
+
+        }catch (SQLException e){
+            System.out.println("ERROR: " + e.getMessage());
+            menu(connection);
+        }
+
     }
 
 }
