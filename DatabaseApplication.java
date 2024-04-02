@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-1
+
 public class DatabaseApplication {
 
     static Scanner scan = new Scanner(System.in);
@@ -59,65 +59,47 @@ public class DatabaseApplication {
         }
     }
 
-    public static Connection databaseConnection(){
-
-        String url = "jdbc:mysql://127.0.0.1:3306/Project_cs425?user=root";
-
+    public static Connection databaseConnection() {
+        String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
         String username = "root";
-        String password = "Gilbert:0529";
-
+        String password = "Master18//";
         Connection myConnection = null;
 
         try {
-
             Class.forName("com.mysql.cj.jdbc.Driver");
             myConnection = DriverManager.getConnection(url, username, password);
             System.out.println("Connected to the database!");
-
         } catch (ClassNotFoundException e) {
-
             System.out.println("JDBC driver not found!");
-           
         } catch (SQLException e) {
-
             System.out.println("SQLException : " + e);
             System.out.println("Connection failed!");
-    
-        } finally {
-            try {
-
-                if (myConnection != null && !myConnection.isClosed()) {
-                    myConnection.close();
-
-                }
-            } catch (SQLException e) {
-
-                System.out.println("Error closing connection: " + e);
-            }
         }
 
         return myConnection;
     }
 
-
     public static void adding(Connection connection) {
         try{       
-        String insertQuery = "INSERT INTO book (AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher) VALUES (?, ?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO book (AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher) VALUES (?, ?, ?, ?, ?)";
     
-        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
     
-        preparedStatement.setInt(1, 22);
-        preparedStatement.setInt(2, 190);
-        preparedStatement.setInt(3, 200);
-        preparedStatement.setInt(4, 15);
-        preparedStatement.setString(5, "IEEE");
+            preparedStatement.setInt(1, 46);
+            preparedStatement.setInt(2, 190);
+            preparedStatement.setInt(3, 200);
+            preparedStatement.setInt(4, 15);
+            preparedStatement.setString(5, "IEEE");
     
-        int rowsInserted = preparedStatement.executeUpdate();
-        if (rowsInserted > 0) {
-            System.out.println("Data inserted successfully!");}
+            int rowsInserted = preparedStatement.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("Data inserted successfully!");
+                menu(connection);
+            }
         }
         catch(SQLException E){
             System.out.println(" oh no!: " + E.getMessage());
+            menu(connection);
         }
     }
 
