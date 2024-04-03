@@ -39,7 +39,7 @@ public class DatabaseApplication {
                     reading(connection);
                     break;
                 case 3:
-                    modifying(connection); // Pass the Connection object
+                    modifying(connection); 
                     break;
                 case 4:
                     deleting(connection);
@@ -107,9 +107,9 @@ public class DatabaseApplication {
     
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
     
-            preparedStatement.setInt(1, 46);
+            preparedStatement.setInt(1, 83);
             preparedStatement.setInt(2, 190);
-            preparedStatement.setInt(3, 200);
+            preparedStatement.setInt(3, 250);
             preparedStatement.setInt(4, 15);
             preparedStatement.setString(5, "IEEE");
     
@@ -164,7 +164,7 @@ public class DatabaseApplication {
 
             PreparedStatement preparedStatement = connection.prepareStatement(mySQLStatement);
 
-            preparedStatement.setInt(1, 40);
+            preparedStatement.setInt(1, 50);
             preparedStatement.setInt(2, 105);
 
             int rowsAffeccted = preparedStatement.executeUpdate();
@@ -183,10 +183,10 @@ public class DatabaseApplication {
         
         try{
 
-            String query = "delete from book where PublicationID = ?";
+            String query = "Delete From book Where PublicationID = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setInt(1, 131);
+            preparedStatement.setInt(1, 128);
 
             int rowsAffeccted = preparedStatement.executeUpdate();
 
