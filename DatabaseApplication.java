@@ -59,6 +59,27 @@ public class DatabaseApplication {
         }
     }
 
+    public static void continueProgram(Connection connection){
+        
+        try{
+            System.out.println("Do you want to continue: Y/N");
+            char userInput = scan.next().charAt(0);
+
+            if(userInput == 'Y'){
+                menu(connection);
+            }
+            else{
+                System.out.println("Connection closed Succesfully");
+                System.exit(0);
+            }
+        }catch(InputMismatchException e){
+            System.out.println("ERROR: Incorrect input");
+            continueProgram(connection);
+        }
+
+
+    }
+
     public static Connection databaseConnection() {
         String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
         String username = "root";
@@ -95,17 +116,43 @@ public class DatabaseApplication {
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("Data inserted successfully!");
-                menu(connection);
+                continueProgram(connection);
             }
         }
         catch(SQLException E){
-            System.out.println(" oh no!: " + E.getMessage());
+            System.out.println("ERROR: " + E.getMessage());
             menu(connection);
         }
     }
 
     public static void reading(Connection connection) {
-        System.out.println("yippie 2");
+        
+        try{
+            String SQLQuery = "Select * From publication";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLQuery);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+
+                int publicationID = resultSet.getInt("PublicationID");
+                String title = resultSet.getString("Title");
+                String topic = resultSet.getString("Topic");
+                String date = resultSet.getString("Date");
+                String publicationType = resultSet.getString("PublicationType");
+
+                System.out.println("PublicationID: " + publicationID + " Title: " + title + " Topic: " + topic + " Date: " + date + " Publication Type: " + publicationType + "\n");
+            }
+
+            continueProgram(connection);
+
+        } catch(SQLException e){
+
+            System.out.println("ERROR: " + e.getMessage());
+            menu(connection);
+
+        }
     }
 
     //updating database method
@@ -123,7 +170,7 @@ public class DatabaseApplication {
             int rowsAffeccted = preparedStatement.executeUpdate();
 
             System.out.println("Database updated. \nRows affected: " + rowsAffeccted);
-            menu(connection);
+            continueProgram(connection);
 
         }catch(SQLException e){
             System.out.println("ERROR: " + e.getMessage());
@@ -144,7 +191,7 @@ public class DatabaseApplication {
             int rowsAffeccted = preparedStatement.executeUpdate();
 
             System.out.println("Successfully deleted. \nRows affected: " + rowsAffeccted);
-            menu(connection);
+            continueProgram(connection);
 
         }catch (SQLException e){
             System.out.println("ERROR: " + e.getMessage());
