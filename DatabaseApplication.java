@@ -24,7 +24,7 @@ public class DatabaseApplication {
             System.out.println("=========================");
             System.out.println("\nWelcome to IEEE Library Database");
             System.out.println("Which option would you like to do?" + "\n" + "1.) Adding" + "\n" + "2.) Reading" + "\n"
-                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) Exit Database");
+                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) Set Operations\n" + "6.) Set Membership\n" + "7.) OLAP\n" + "8.) Exit Database");
             System.out.println("=========================");
             System.out.println("Enter an option:");
 
@@ -45,6 +45,15 @@ public class DatabaseApplication {
                     deleting(connection);
                     break;
                 case 5:
+                    setOperation(connection);
+                    break;
+                case 6: 
+                    setMembership(connection);
+                    break;
+                case 7:
+                    OLAP(connection);
+                    break;
+                case 8:
                     System.out.println("Connection closed Succesfully");
                     System.exit(0);
                     break;
@@ -194,6 +203,77 @@ public class DatabaseApplication {
             continueProgram(connection);
 
         }catch (SQLException e){
+            System.out.println("ERROR: " + e.getMessage());
+            menu(connection);
+        }
+
+    }
+
+
+    public static void setOperation(Connection connection){
+
+       
+    }
+
+    public static void setMembership(Connection connection){
+
+    }
+
+    public static void OLAP(Connection connection){
+
+        try{
+
+            int userResponse;
+
+            System.out.println("Do you want to do:\n1.) Group By\n" + "2.) Rollup\n" + "3.)Cube\n");
+
+            userResponse = scan.nextInt();
+
+            switch(userResponse){
+
+                //Group by
+                case 1: 
+                    //Total number of authors per publication type
+                    String query = "Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors " + 
+                    "From Authors " + 
+                    "Group By PublicationType;";
+    
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+    
+                    ResultSet resultSet = preparedStatement.executeQuery();
+    
+                    while(resultSet.next()){
+    
+                        String publicationID = resultSet.getString("PublicationType");
+                        int totalAuthors = resultSet.getInt("TotalAuthors");
+    
+                        System.out.println("PublicationID: " + publicationID + "Total Authors: " + totalAuthors + "\n");
+                    }
+    
+                    continueProgram(connection);
+
+                    break;
+
+                //Rollup
+                case 2:
+
+                    break;
+                    
+                //Cube
+                case 3:
+
+                    break;
+
+                default:
+                    System.out.println("ERROR: Invalid input");
+                    menu(connection);
+            }
+
+
+
+           
+
+        }catch(SQLException e){
             System.out.println("ERROR: " + e.getMessage());
             menu(connection);
         }
