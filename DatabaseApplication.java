@@ -24,7 +24,7 @@ public class DatabaseApplication {
             System.out.println("=========================");
             System.out.println("\nWelcome to IEEE Library Database");
             System.out.println("Which option would you like to do?" + "\n" + "1.) Adding" + "\n" + "2.) Reading" + "\n"
-                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) Set Operations\n" + "6.) Set Membership\n" + "7.) OLAP\n" + "8.) Exit Database");
+                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) Set Operations\n" + "6.) Set Membership\n" + "7.) OLAP\n" + "8.) Windowing\n"+ "9.) Advanced Aggregated Funcation\n" +"10.) Exit Database");
             System.out.println("=========================");
             System.out.println("Enter an option:");
 
@@ -54,6 +54,13 @@ public class DatabaseApplication {
                     OLAP(connection);
                     break;
                 case 8:
+                    windowing(connection);
+                    break;
+                case 9:
+                    AdvanceAggFunctions(connection);
+                    break;
+
+                case 10:
                     System.out.println("Connection closed Succesfully");
                     System.exit(0);
                     break;
@@ -90,9 +97,9 @@ public class DatabaseApplication {
     }
 
     public static Connection databaseConnection() {
-        String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
+        String url = "jdbc:mysql://127.0.0.1:3306/project_CS425?user=root";
         String username = "root";
-        String password = "Master18//";
+        String password = "Gilbert:0529";
         Connection myConnection = null;
 
         try {
@@ -320,4 +327,118 @@ public class DatabaseApplication {
 
     }
 
+    public static void windowing(Connection connection){
+        try{
+            int userResponse;
+
+            System.out.println("Do you want to do:\n1.) Moving Averages\n" + "2.) running sums\n");
+
+            userResponse = scan.nextInt();
+
+            switch(userResponse){
+
+                //Moving Averages
+                case 1: 
+                    //Average amount of page and chapter numbers within each publisher
+                    String query1 = "SELECT Publisher, " + 
+                                    "ROUND(AVG(TotalPages), 2) AS AvgPage, ROUND(AVG(ChapterNumbers), 2) AS AvgChapter " + 
+                                    "FROM book " +
+                                    "GROUP BY Publisher";
+                    
+                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
+                    
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    
+                    while(resultSet.next()) {
+                        String publisher = resultSet.getString("Publisher");
+                        double avgPage = resultSet.getDouble("AvgPage");
+                        double avgChapter = resultSet.getDouble("AvgChapter");
+                    
+                        System.out.println("Publisher: " + publisher + " AvgPage: " + avgPage + " AvgChapter: " + avgChapter);
+                    }
+                    
+                    continueProgram(connection);
+    
+
+                    break;
+
+                //Running Sums
+                case 2:
+
+                    //The amount of publication types within each topic
+                    String query2 = "Select Topic, PublicationType, Count(PublicationType) As Count "
+                    + "FROM publication "
+                    + "Group By Topic, PublicationType With Rollup "
+                    + "Having Topic Is Not Null And PublicationType Is Not Null";
+
+                    PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+
+                    ResultSet resultSet2 = preparedStatement2.executeQuery();
+
+                    while(resultSet2.next()){
+    
+                        String topic = resultSet2.getString("Topic");
+                        String publicationType = resultSet2.getString("PublicationType");
+                        int count = resultSet2.getInt("Count");
+    
+                        System.out.println("Topic: " + topic + " Publication Type: " + publicationType + " Count: " + count + "\n");
+                    }
+    
+                    continueProgram(connection);
+
+                    break;
+        }
+    }catch(SQLException e){
+        System.out.println("ERROR: " + e.getMessage());
+        menu(connection);
+    }
+
+    
+
 }
+/**
+ * @param connection
+ */
+public static void AdvanceAggFunctions(Connection connection){
+    try{
+        int userResponse;
+
+            System.out.println("Do you want to do:\n1.) Ranks\n");
+
+            userResponse = scan.nextInt();
+
+            switch(userResponse){
+
+                case 1: 
+                    //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
+                    String query1 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
+                                    "FROM ( " + 
+                                    "SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID " +
+                                    "FROM authorconference " +
+                                    "GROUP BY AuthorsID "+
+                                    ") AS AuthorTotals";
+                    
+                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
+                    
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    
+                    while(resultSet.next()) {
+                        String Auth = resultSet.getString("AuthorsID");
+                        double ranks = resultSet.getDouble("ranks");
+                    
+                        System.out.println("AuthorsID: " + Auth + " ranks: " + ranks);
+                    }
+                    
+                    continueProgram(connection);
+    
+
+                    break;
+        }
+    }catch(SQLException e){
+        System.out.println("ERROR: " + e.getMessage());
+        menu(connection);
+    }
+    }
+}
+
+
