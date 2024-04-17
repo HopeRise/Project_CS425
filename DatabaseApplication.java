@@ -217,6 +217,29 @@ public class DatabaseApplication {
 
     public static void setMembership(Connection connection){
 
+        try{
+
+            String query = "Select  PublicationID, Title From publication " 
+            + " Where PublicationID In (Select PublicationID From book)";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+    
+                int publicationID = resultSet.getInt("PublicationID");
+                String title = resultSet.getString("Title");
+
+                System.out.println("PublicationID: " + publicationID + " Title: " + title + "\n");
+            }
+
+            continueProgram(connection);
+
+        }catch(SQLException e){
+            System.out.println("ERROR: " + e.getMessage());
+            menu(connection);
+        }
+
     }
 
     public static void OLAP(Connection connection){
@@ -225,7 +248,7 @@ public class DatabaseApplication {
 
             int userResponse;
 
-            System.out.println("Do you want to do:\n1.) Group By\n" + "2.) Rollup\n" + "3.)Cube\n");
+            System.out.println("Do you want to do:\n1.) Group By\n" + "2.) Rollup\n" + "3.) Cube\n");
 
             userResponse = scan.nextInt();
 
@@ -234,11 +257,11 @@ public class DatabaseApplication {
                 //Group by
                 case 1: 
                     //Total number of authors per publication type
-                    String query = "Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors " + 
+                    String query1 = "Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors " + 
                     "From Authors " + 
                     "Group By PublicationType;";
     
-                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
     
                     ResultSet resultSet = preparedStatement.executeQuery();
     
@@ -257,6 +280,27 @@ public class DatabaseApplication {
                 //Rollup
                 case 2:
 
+                    //The amount of publication types within each topic
+                    String query2 = "Select Topic, PublicationType, Count(PublicationType) As Count "
+                    + "FROM publication "
+                    + "Group By Topic, PublicationType With Rollup "
+                    + "Having Topic Is Not Null And PublicationType Is Not Null";
+
+                    PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+
+                    ResultSet resultSet2 = preparedStatement2.executeQuery();
+
+                    while(resultSet2.next()){
+    
+                        String topic = resultSet2.getString("Topic");
+                        String publicationType = resultSet2.getString("PublicationType");
+                        int count = resultSet2.getInt("Count");
+    
+                        System.out.println("Topic: " + topic + " Publication Type: " + publicationType + " Count: " + count + "\n");
+                    }
+    
+                    continueProgram(connection);
+
                     break;
                     
                 //Cube
@@ -268,10 +312,6 @@ public class DatabaseApplication {
                     System.out.println("ERROR: Invalid input");
                     menu(connection);
             }
-
-
-
-           
 
         }catch(SQLException e){
             System.out.println("ERROR: " + e.getMessage());
