@@ -7,6 +7,10 @@ import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import javax.naming.spi.DirStateFactory.Result;
+
+import com.mysql.cj.protocol.Resultset;
+
 public class DatabaseApplication {
 
     static Scanner scan = new Scanner(System.in);
@@ -174,7 +178,7 @@ public class DatabaseApplication {
                 String date = resultSet.getString("Date");
                 String publicationType = resultSet.getString("PublicationType");
 
-                System.out.println("PublicationID: " + publicationID + " Title: " + title + " Topic: " + topic + " Date: " + date + " Publication Type: " + publicationType + "\n");
+                System.out.println("PublicationID: " + publicationID + " | Title: " + title + " | Topic: " + topic + " | Date: " + date + " | Publication Type: " + publicationType);
             }
 
             continueProgram(connection);
@@ -253,7 +257,7 @@ public class DatabaseApplication {
                 int publicationID = resultSet.getInt("PublicationID");
                 String title = resultSet.getString("Title");
 
-                System.out.println("PublicationID: " + publicationID + " Title: " + title + "\n");
+                System.out.println("PublicationID: " + publicationID + " Title: " + title);
             }
 
             continueProgram(connection);
@@ -293,7 +297,7 @@ public class DatabaseApplication {
                         String publicationID = resultSet.getString("PublicationType");
                         int totalAuthors = resultSet.getInt("TotalAuthors");
     
-                        System.out.println("PublicationID: " + publicationID + "Total Authors: " + totalAuthors + "\n");
+                        System.out.println("PublicationID: " + publicationID + " | Total Authors: " + totalAuthors);
                     }
     
                     continueProgram(connection);
@@ -319,7 +323,7 @@ public class DatabaseApplication {
                         String publicationType = resultSet2.getString("PublicationType");
                         int count = resultSet2.getInt("Count");
     
-                        System.out.println("Topic: " + topic + " Publication Type: " + publicationType + " Count: " + count + "\n");
+                        System.out.println("Topic: " + topic + " | Publication Type: " + publicationType + " | Count: " + count);
                     }
     
                     continueProgram(connection);
@@ -353,41 +357,68 @@ public class DatabaseApplication {
             System.out.println("Do you want to do:\n1.) Ranking\n2.) Windowing");
 
             userResponse = scan.nextInt();
-
+        
             switch(userResponse){
 
+                //Ranking
                 case 1: 
 
                     int choice;
-                    //Rank, dense_rank, percent_rank, cume_dist, row_number, ntile(n)
+                    
                     System.out.println("Which option do you want to do:\n1.) Rank\n2.) Dense Rank\n3.) Percent Rank\n4.) Cume Dist\n5.) Row Number\n6.) Ntile(n)");
                     choice = scan.nextInt();
 
                     switch (choice){
 
-                        case 1:
+                        case 1: 
+                            try{
+                                // Rank the podcast episodes based on the duration of the episode, displaying only the episode name, number, duration and rank
+                                String query1 = "Select Ep_name, Ep_Num, Duration, " +
+                                "Rank() Over (Order By Duration Desc) as duration_rank " +
+                                "From PodcastEpisode";
+
+                                PreparedStatement preparedStatement = connection.prepareStatement(query1);
+                                ResultSet resultSet = preparedStatement.executeQuery();
+
+
+                                while(resultSet.next()) {
+                                    
+                                    String episodeName = resultSet.getString("Ep_name");
+                                    int episodeNumber = resultSet.getInt("Ep_Num");
+                                    int duration = resultSet.getInt("Duration");
+                                    int durationRank = resultSet.getInt("duration_rank");
+
+                                    System.out.println("Episode Name: " + episodeName + " | Episode Number: " + episodeNumber + " | Duration: " + duration + " | Duration Rank: " + durationRank);
+
+                                }
+
+                                continueProgram(connection);
+                            }catch(SQLException e){
+                                System.out.println("ERROR: " + e.getMessage());
+                                menu(connection);
+                            }
 
                             break;
                         case 2:
 
                             try{
                                  //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
-                                String query1 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
+                                String query2 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
                                 "FROM ( " + 
                                 "SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID " +
                                 "FROM authorsconference " +
                                 "GROUP BY AuthorsID "+
                                 ") AS AuthorTotals";
     
-                                PreparedStatement preparedStatement = connection.prepareStatement(query1);
+                                PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
     
-                                ResultSet resultSet = preparedStatement.executeQuery();
+                                ResultSet resultSet2 = preparedStatement2.executeQuery();
     
-                                while(resultSet.next()) {
-                                    String Auth = resultSet.getString("AuthorsID");
-                                    double ranks = resultSet.getDouble("ranks");
+                                while(resultSet2.next()) {
+                                    String Auth = resultSet2.getString("AuthorsID");
+                                    double ranks = resultSet2.getDouble("ranks");
     
-                                    System.out.println("AuthorsID: " + Auth + " Ranks: " + ranks);
+                                    System.out.println("AuthorsID: " + Auth + " | Ranks: " + ranks);
                                 }
     
                                 continueProgram(connection);
@@ -399,14 +430,125 @@ public class DatabaseApplication {
                             break;
                         case 3:
 
+                            try{
+                                String query3 = "Select *, Rank() Over(Order By TotalPages) as p_rank, " +
+                                "Round(Percent_Rank() Over (Order By TotalPages), 2)*100 as p_percent_rank From book";
+
+                                PreparedStatement preparedStatement3 = connection.prepareStatement(query3);
+                                ResultSet resultSet3 = preparedStatement3.executeQuery();
+
+                                while(resultSet3.next()){
+                                    int AID = resultSet3.getInt("AuthorsID");
+                                    int PID = resultSet3.getInt("PublicationID");
+                                    int totalPages = resultSet3.getInt("TotalPages");
+                                    int chapterNumbers = resultSet3.getInt("ChapterNumbers");
+                                    String publisher = resultSet3.getString("Publisher");
+                                    double p_rank = resultSet3.getDouble("p_rank");
+                                    int p_PercentRank = resultSet3.getInt("p_percent_rank");
+
+                                    System.out.println("AuthorsID: " + AID + " | PublicationID: " + PID + " | Total Pages: " + totalPages + " | Chapter Numbers: " + chapterNumbers + " | Publisher: " + publisher + " | Rank: " + p_rank + " | Percent Rank: " + p_PercentRank);
+                                    
+                                }
+
+                                continueProgram(connection);
+                                
+                            }catch(SQLException e){
+                                System.out.println("ERROR: " + e.getMessage());
+                                menu(connection);
+                            }
+
                             break;
                         case 4:
+
+                        try{
+                            String query4 = "Select *, Round(Round(Cume_Dist() Over (Order By ChapterNumbers), 2)*100, 2) as Cume_Percent From book";
+
+                            PreparedStatement preparedStatement4 = connection.prepareStatement(query4);
+                            ResultSet resultSet4 = preparedStatement4.executeQuery();
+
+                            while(resultSet4.next()){
+                                int AuthorsID = resultSet4.getInt("AuthorsID");
+                                int PublicationID = resultSet4.getInt("PublicationID");
+                                int pages = resultSet4.getInt("TotalPages");
+                                int chapters = resultSet4.getInt("ChapterNumbers");
+                                String publisher = resultSet4.getString("Publisher");
+                                int cumeDistPercent = resultSet4.getInt("Cume_Percent");
+
+                                System.out.println("AuthorsID: " + AuthorsID + " | PublicationID: " + PublicationID + " | Total Pages: " + pages + " | Chapter Numbers: " + chapters + " | Publisher: " + publisher + " | Cume Dist Percent: " + cumeDistPercent);
+                                
+                            }
+
+                            continueProgram(connection);
+                            
+                        }catch(SQLException e){
+                            System.out.println("ERROR: " + e.getMessage());
+                            menu(connection);
+                        }
 
                             break;
                         case 5:
 
+                            try{
+
+                                String query5 = "Select Row_Number() Over (Order By TotalPages) as row_num, "
+                                + "AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher, Rank() Over (Order By TotalPages) As pages_rank "+
+                                "From book";
+
+                                PreparedStatement preparedStatement5 = connection.prepareStatement(query5);
+                                ResultSet resultSet5 = preparedStatement5.executeQuery();
+
+                                while(resultSet5.next()){
+
+                                    int rowNumber = resultSet5.getInt("row_num");
+                                    int authorsID = resultSet5.getInt("AuthorsID");
+                                    int publicationID = resultSet5.getInt("PublicationID");
+                                    int totPages = resultSet5.getInt("TotalPages");
+                                    int chapterAmount = resultSet5.getInt("ChapterNumbers");
+                                    String Publisher = resultSet5.getString("Publisher");
+                                    int rank = resultSet5.getInt("pages_rank");
+
+                                    System.out.println("Row Number: " + rowNumber + " | AuthorsID: " + authorsID + " | PublicationID: " + publicationID + " | Total Pages: " + totPages + " | Chapter Numbers: " + chapterAmount + " | Publisher: " + Publisher + " | Rank: " + rank);
+
+                                }
+
+                                continueProgram(connection);
+
+
+                            }catch(SQLException e){
+                                System.out.println("ERROR: " + e.getMessage());
+                                menu(connection);
+                            }
+
+
                             break;
                         case 6:
+                            
+                            try{
+
+                                String query6 = "Select AuthorsID, ConferenceID," +
+                                "NTILE(5) over (order by AuthorsID) AS Group5 " +
+                                "From authorsconference";
+
+                                PreparedStatement preparedStatement6 = connection.prepareStatement(query6);
+                                ResultSet resultSet6 = preparedStatement6.executeQuery();
+
+
+                                while(resultSet6.next()) {
+                                    
+                                    int authorsID = resultSet6.getInt("AuthorsID");
+                                    int conferenceID = resultSet6.getInt("ConferenceID");
+                                    int ntile = resultSet6.getInt("Group5");
+
+                                    System.out.println("AuthorsID: " + authorsID + " | ConferenceID: " + conferenceID + " | Ntile(5): " + ntile);
+                                    
+                                }
+    
+                                continueProgram(connection);
+
+                            }catch(SQLException e){
+                                System.out.println("ERROR: " + e.getMessage());
+                                menu(connection);
+                            }    
 
                             break;
                         default:
@@ -415,7 +557,8 @@ public class DatabaseApplication {
                     }
                     
                     break;
-                    
+                
+                //Windowing
                 case 2: 
 
                     int choice2;    
@@ -441,7 +584,7 @@ public class DatabaseApplication {
                                 double avgPage = resultSet2.getDouble("AvgPage");
                                 double avgChapter = resultSet2.getDouble("AvgChapter");
         
-                                System.out.println("Publisher: " + publisher + " AvgPage: " + avgPage + " AvgChapter: " + avgChapter);
+                                System.out.println("Publisher: " + publisher + " | AvgPage: " + avgPage + " | AvgChapter: " + avgChapter);
                             }
         
                             continueProgram(connection);
@@ -470,7 +613,7 @@ public class DatabaseApplication {
                                 int episodeCount = resultSet3.getInt("episodes_count");
                                 int runningTotal = resultSet3.getInt("running_total");
 
-                                System.out.println("Episode Number: " + episodeNumber + " Episodes Count: " + episodeCount + " Running Total: " + runningTotal + "\n");
+                                System.out.println("Episode Number: " + episodeNumber + " | Episodes Count: " + episodeCount + " | Running Total: " + runningTotal);
 
                             }
         
