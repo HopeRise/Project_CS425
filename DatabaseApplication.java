@@ -24,7 +24,7 @@ public class DatabaseApplication {
             System.out.println("=========================");
             System.out.println("\nWelcome to IEEE Library Database");
             System.out.println("Which option would you like to do?" + "\n" + "1.) Adding" + "\n" + "2.) Reading" + "\n"
-                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) Set Operations\n" + "6.) Set Membership\n" + "7.) OLAP\n" + "8.) Windowing\n"+ "9.) Advanced Aggregated Funcation\n" +"10.) Exit Database");
+                    + "3.) Modifying" + "\n" + "4.) Deleting\n" + "5.) 'Set'Functions\n" + "6.) OLAP\n" + "7.) Advanced Aggregated Functions\n" + "8.) With Clause Queries\n" + "9.) Exit Database");
             System.out.println("=========================");
             System.out.println("Enter an option:");
 
@@ -45,22 +45,38 @@ public class DatabaseApplication {
                     deleting(connection);
                     break;
                 case 5:
-                    setOperation(connection);
+                    int userInput;
+                    System.out.println("What 'Set' Function would you like to do:\n1.) Set Operation\n2.) Set Membership\n3.) Set Comparison");
+                    userInput = scan.nextInt();
+
+                    switch(userInput){
+
+                        case 1:
+                            setOperation(connection);
+                            break;
+                        case 2: 
+                            setMembership(connection);
+                            break;
+                        case 3:
+                            setComparison(connection);
+                            break;
+                        default:
+                            System.out.println("ERROR: Input isn't valid");
+                            menu(connection);
+                            break;
+                    }
+
                     break;
-                case 6: 
-                    setMembership(connection);
-                    break;
-                case 7:
+                case 6:
                     OLAP(connection);
                     break;
-                case 8:
-                    windowing(connection);
-                    break;
-                case 9:
+                case 7:
                     AdvanceAggFunctions(connection);
                     break;
-
-                case 10:
+                case 8:
+                    withQueries(connection);
+                    break;
+                case 9:
                     System.out.println("Connection closed Succesfully");
                     System.exit(0);
                     break;
@@ -97,9 +113,9 @@ public class DatabaseApplication {
     }
 
     public static Connection databaseConnection() {
-        String url = "jdbc:mysql://127.0.0.1:3306/project_CS425?user=root";
+        String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
         String username = "root";
-        String password = "Gilbert:0529";
+        String password = "Master18//";
         Connection myConnection = null;
 
         try {
@@ -310,7 +326,7 @@ public class DatabaseApplication {
 
                     break;
                     
-                //Cube
+                //Cube: would not work for our database
                 case 3:
 
                     break;
@@ -318,6 +334,7 @@ public class DatabaseApplication {
                 default:
                     System.out.println("ERROR: Invalid input");
                     menu(connection);
+                    break;
             }
 
         }catch(SQLException e){
@@ -327,117 +344,163 @@ public class DatabaseApplication {
 
     }
 
-    public static void windowing(Connection connection){
-        try{
+    // window and ranking
+    public static void AdvanceAggFunctions(Connection connection){
+
+        
             int userResponse;
 
-            System.out.println("Do you want to do:\n1.) Moving Averages\n" + "2.) running sums\n");
-
-            userResponse = scan.nextInt();
-
-            switch(userResponse){
-
-                //Moving Averages
-                case 1: 
-                    //Average amount of page and chapter numbers within each publisher
-                    String query1 = "SELECT Publisher, " + 
-                                    "ROUND(AVG(TotalPages), 2) AS AvgPage, ROUND(AVG(ChapterNumbers), 2) AS AvgChapter " + 
-                                    "FROM book " +
-                                    "GROUP BY Publisher";
-                    
-                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
-                    
-                    ResultSet resultSet = preparedStatement.executeQuery();
-                    
-                    while(resultSet.next()) {
-                        String publisher = resultSet.getString("Publisher");
-                        double avgPage = resultSet.getDouble("AvgPage");
-                        double avgChapter = resultSet.getDouble("AvgChapter");
-                    
-                        System.out.println("Publisher: " + publisher + " AvgPage: " + avgPage + " AvgChapter: " + avgChapter);
-                    }
-                    
-                    continueProgram(connection);
-    
-
-                    break;
-
-                //Running Sums
-                case 2:
-
-                    //The amount of publication types within each topic
-                    String query2 = "Select Topic, PublicationType, Count(PublicationType) As Count "
-                    + "FROM publication "
-                    + "Group By Topic, PublicationType With Rollup "
-                    + "Having Topic Is Not Null And PublicationType Is Not Null";
-
-                    PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
-
-                    ResultSet resultSet2 = preparedStatement2.executeQuery();
-
-                    while(resultSet2.next()){
-    
-                        String topic = resultSet2.getString("Topic");
-                        String publicationType = resultSet2.getString("PublicationType");
-                        int count = resultSet2.getInt("Count");
-    
-                        System.out.println("Topic: " + topic + " Publication Type: " + publicationType + " Count: " + count + "\n");
-                    }
-    
-                    continueProgram(connection);
-
-                    break;
-        }
-    }catch(SQLException e){
-        System.out.println("ERROR: " + e.getMessage());
-        menu(connection);
-    }
-
-    
-
-}
-/**
- * @param connection
- */
-public static void AdvanceAggFunctions(Connection connection){
-    try{
-        int userResponse;
-
-            System.out.println("Do you want to do:\n1.) Ranks\n");
+            System.out.println("Do you want to do:\n1.) Ranking\n2.) Windowing");
 
             userResponse = scan.nextInt();
 
             switch(userResponse){
 
                 case 1: 
-                    //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
-                    String query1 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
-                                    "FROM ( " + 
-                                    "SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID " +
-                                    "FROM authorconference " +
-                                    "GROUP BY AuthorsID "+
-                                    ") AS AuthorTotals";
-                    
-                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
-                    
-                    ResultSet resultSet = preparedStatement.executeQuery();
-                    
-                    while(resultSet.next()) {
-                        String Auth = resultSet.getString("AuthorsID");
-                        double ranks = resultSet.getDouble("ranks");
-                    
-                        System.out.println("AuthorsID: " + Auth + " ranks: " + ranks);
+
+                    int choice;
+                    //Rank, dense_rank, percent_rank, cume_dist, row_number, ntile(n)
+                    System.out.println("Which option do you want to do:\n1.) Rank\n2.) Dense Rank\n3.) Percent Rank\n4.) Cume Dist\n5.) Row Number\n6.) Ntile(n)");
+                    choice = scan.nextInt();
+
+                    switch (choice){
+
+                        case 1:
+
+                            break;
+                        case 2:
+
+                            try{
+                                 //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
+                                String query1 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
+                                "FROM ( " + 
+                                "SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID " +
+                                "FROM authorsconference " +
+                                "GROUP BY AuthorsID "+
+                                ") AS AuthorTotals";
+    
+                                PreparedStatement preparedStatement = connection.prepareStatement(query1);
+    
+                                ResultSet resultSet = preparedStatement.executeQuery();
+    
+                                while(resultSet.next()) {
+                                    String Auth = resultSet.getString("AuthorsID");
+                                    double ranks = resultSet.getDouble("ranks");
+    
+                                    System.out.println("AuthorsID: " + Auth + " Ranks: " + ranks);
+                                }
+    
+                                continueProgram(connection);
+                            }catch(SQLException e){
+                                System.out.println("ERROR: " + e.getMessage());
+                                menu(connection);
+                            }
+
+                            break;
+                        case 3:
+
+                            break;
+                        case 4:
+
+                            break;
+                        case 5:
+
+                            break;
+                        case 6:
+
+                            break;
+                        default:
+                            System.out.println("ERROR: Invalid input");
+                            menu(connection);
                     }
                     
-                    continueProgram(connection);
-    
+                    break;
+                    
+                case 2: 
+
+                    int choice2;    
+                    System.out.println("Which option do you want to do:\n1.) Moving Averages\n2.) Running Sum/Totals");
+                    choice2 = scan.nextInt();
+
+                    //Moving Averages
+                    if(choice2 == 1){
+                        
+                        try{
+                            //Average amount of page and chapter numbers within each publisher
+                            String query2 = "SELECT Publisher, " + 
+                            "ROUND(AVG(TotalPages), 2) AS AvgPage, ROUND(AVG(ChapterNumbers), 2) AS AvgChapter " + 
+                            "FROM book " +
+                            "GROUP BY Publisher";
+        
+                            PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+        
+                            ResultSet resultSet2 = preparedStatement2.executeQuery();
+        
+                            while(resultSet2.next()) {
+                                String publisher = resultSet2.getString("Publisher");
+                                double avgPage = resultSet2.getDouble("AvgPage");
+                                double avgChapter = resultSet2.getDouble("AvgChapter");
+        
+                                System.out.println("Publisher: " + publisher + " AvgPage: " + avgPage + " AvgChapter: " + avgChapter);
+                            }
+        
+                            continueProgram(connection);
+
+                        }catch(SQLException e){
+                            System.out.println("ERROR: " + e.getMessage());
+                            menu(connection);
+                        }
+                  
+                    //Running Sum/Totals
+                    }else if (choice2 == 2){
+                        
+                        try{
+
+                            String query2 = "Select Ep_num, Count(*) As episodes_count, "
+                            + "Sum(Count(*)) Over (Order By Ep_num) As running_total From podcastepisode "
+                            + "Group By Ep_num "
+                            + "Order By Ep_num";
+
+                            PreparedStatement preparedStatement3 = connection.prepareStatement(query2);
+                            ResultSet resultSet3 = preparedStatement3.executeQuery();
+
+                            while(resultSet3.next()) {
+                                
+                                int episodeNumber = resultSet3.getInt("Ep_num");
+                                int episodeCount = resultSet3.getInt("episodes_count");
+                                int runningTotal = resultSet3.getInt("running_total");
+
+                                System.out.println("Episode Number: " + episodeNumber + " Episodes Count: " + episodeCount + " Running Total: " + runningTotal + "\n");
+
+                            }
+        
+                            continueProgram(connection);
+
+                        }catch(SQLException e){
+                            System.out.println("ERROR: " + e.getMessage());
+                            menu(connection);
+                        }
+                    }
+                    else{
+                        System.out.println("ERROR: Invalid input");
+                        menu(connection);
+                    }
 
                     break;
-        }
-    }catch(SQLException e){
-        System.out.println("ERROR: " + e.getMessage());
-        menu(connection);
+                default:
+                    System.out.println("ERROR: Invalid input");
+                    menu(connection);
+                    break;
+            }
+       
     }
+
+    public static void setComparison(Connection connection){
+
+    }
+
+    public static void withQueries(Connection connection){
+
     }
 }
 
