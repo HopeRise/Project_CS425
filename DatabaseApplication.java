@@ -139,23 +139,30 @@ public class DatabaseApplication {
     //adding method 
     public static void adding(Connection connection) {
         try{       
-            String insertQuery = "INSERT INTO book (AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher) VALUES (?, ?, ?, ?, ?)";
-    
-            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
-    
-            preparedStatement.setInt(1, 83);
-            preparedStatement.setInt(2, 190);
-            preparedStatement.setInt(3, 250);
-            preparedStatement.setInt(4, 15);
-            preparedStatement.setString(5, "IEEE");
-    
-            int rowsInserted = preparedStatement.executeUpdate();
-            if (rowsInserted > 0) {
-                System.out.println("Data inserted successfully!");
-                continueProgram(connection);
+
+            //INSERT INTO publication (PublicationID, Title, Topic, Date, PublicationType) Values ()
+            System.out.println("Enter your SQL query:");
+            scan.nextLine();
+            String sqlQuery = scan.nextLine();
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+
+            boolean success = preparedStatement.execute();
+            
+            if (success) {
+                System.out.println("Query executed successfully!");
+                // If you expect a result set, you can handle it here
+            } else {
+                int rowsAffected = preparedStatement.getUpdateCount();
+                if (rowsAffected > 0) {
+                    System.out.println("Query executed successfully! " + rowsAffected + " row(s) affected.");
+                } else {
+                    System.out.println("No rows affected.");
+                }
             }
-        }
-        catch(SQLException E){
+            
+            continueProgram(connection);
+        }catch(SQLException E){
             System.out.println("ERROR: " + E.getMessage());
             menu(connection);
         }
@@ -164,7 +171,11 @@ public class DatabaseApplication {
     public static void reading(Connection connection) {
         
         try{
-            String SQLQuery = "Select * From publication";
+
+            System.out.println("WHich table would you like to read data from:\n1.) publication\n2.) podcastepisode\n3.) journalarticle\n4.) conference\n5.) book\n6.) authorsconference\n7.) authors\n");
+            scan.nextLine();
+            String tableName = scan.nextLine();
+            String SQLQuery = "Select * From " + tableName ;
 
             PreparedStatement preparedStatement = connection.prepareStatement(SQLQuery);
 
@@ -172,13 +183,96 @@ public class DatabaseApplication {
 
             while(resultSet.next()){
 
-                int publicationID = resultSet.getInt("PublicationID");
-                String title = resultSet.getString("Title");
-                String topic = resultSet.getString("Topic");
-                String date = resultSet.getString("Date");
-                String publicationType = resultSet.getString("PublicationType");
+                switch(tableName){
 
-                System.out.println("PublicationID: " + publicationID + " | Title: " + title + " | Topic: " + topic + " | Date: " + date + " | Publication Type: " + publicationType);
+                    case "publication":
+
+                        int publicationID = resultSet.getInt("PublicationID");
+                        String title = resultSet.getString("Title");
+                        String topic = resultSet.getString("Topic");
+                        String date = resultSet.getString("Date");
+                        String publicationType = resultSet.getString("PublicationType");
+        
+                        System.out.println("PublicationID: " + publicationID + " | Title: " + title + " | Topic: " + topic + " | Date: " + date + " | Publication Type: " + publicationType);
+
+                        break;
+                    case "podcastepisode":
+
+                        int publicationID2 = resultSet.getInt("PublicationID");
+                        int authorsID = resultSet.getInt("AuthorsID");
+                        String episodeName = resultSet.getString("Ep_name");
+                        int episodeNumber = resultSet.getInt("Ep_num");
+                        int duration = resultSet.getInt("Duration");
+
+                        System.out.println("PublicationID: " + publicationID2 + " | AuthorsID: " + authorsID + " | Episode Name: " + episodeName + " | Episode Number: " + episodeNumber + " | Duration: " + duration);
+
+                        break;
+
+                    case "journalarticle": 
+
+                        int authorsID2 = resultSet.getInt("AuthorsID");
+                        int publicationID3 = resultSet.getInt("PublicationID");
+                        String articleTitle = resultSet.getString("ArticleTitle");
+                        int volume = resultSet.getInt("Volume");
+                        int issue = resultSet.getInt("Issue");
+
+                        System.out.println("AuthorsID: " + authorsID2 + " | PublicationID: " + publicationID3 + " | Article Title: " + articleTitle + " | Volume: " + volume + " | Issue: " + issue);
+
+                        break;
+                    case "conference":
+
+                        int conferenceID = resultSet.getInt("ConferenceID");
+                        String name = resultSet.getString("Name");
+                        String topic2 = resultSet.getString("Topic");
+                        String location = resultSet.getString("Location");
+                        String startDate = resultSet.getString("StartDate");
+                        String endDate = resultSet.getString("EndDate");
+                        String EventFormat = resultSet.getString("EventFormat");
+
+                        System.out.println("ConferenceID: " + conferenceID + " | Name: " + name + " | Topic: " + topic2 + " | Location: " + location + " | Start Date: " + startDate + " | End Date: " + endDate + " | Event Format" + EventFormat);
+
+                        break;
+
+
+                    case "book":
+
+                        int authorsID3 = resultSet.getInt("AuthorsID");
+                        int publicationID4 = resultSet.getInt("PublicationID");
+                        int totalPages = resultSet.getInt("TotalPages");
+                        int chapterNumbers = resultSet.getInt("ChapterNumbers");
+                        String publisher = resultSet.getString("Publisher");
+
+                        System.out.println("AuthorsID: " + authorsID3 + " | PublicationID: " + publicationID4 + " | Total Pages: " + totalPages + " | Chapter Numbers: " + chapterNumbers + " | Publisher: " + publisher);
+
+                        break;
+
+                    case "authorsconference":
+
+                        int AuthorsID = resultSet.getInt("AuthorsID");
+                        int ConferenceID = resultSet.getInt("ConferenceID");
+
+
+                        System.out.println("AuthorsID: " + AuthorsID + " | ConferenceID: " + ConferenceID);
+
+                        break;
+
+                    case "authors":
+
+                        int authorsID4 = resultSet.getInt("AuthorsID");
+                        String firstName = resultSet.getString("FirstName");
+                        String lastName = resultSet.getString("LastName");
+                        String affiliation = resultSet.getString("Affiliation");
+                        String publiactionType2 = resultSet.getString("PublicationType");
+
+                        System.out.println("AuthorsID: " + authorsID4 + " | First Name: " + firstName + " | Last Name: " + lastName + " | Affiliation: " + affiliation + " | PublicationType: " + publiactionType2);
+
+                        break;
+                    default:
+                        System.out.println("ERROR: Invalid input");
+                        menu(connection);
+                        break;
+
+                }
             }
 
             continueProgram(connection);
