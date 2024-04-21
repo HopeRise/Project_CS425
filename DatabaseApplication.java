@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.sql.ResultSetMetaData;
 
 import javax.naming.spi.DirStateFactory.Result;
 
@@ -117,9 +118,9 @@ public class DatabaseApplication {
     }
 
     public static Connection databaseConnection() {
-        String url = "jdbc:mysql://127.0.0.1:3306/project_cs425?user=root";
+        String url = "jdbc:mysql://localhost:3306/ieee_database2?user=root";
         String username = "root";
-        String password = "Gilbert:0529";
+        String password = "Master18//";
         Connection myConnection = null;
 
         try {
@@ -379,22 +380,25 @@ public class DatabaseApplication {
                 //Group by
                 case 1: 
                     //Total number of authors per publication type
-                    String query1 = "Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors " + 
-                    "From Authors " + 
-                    "Group By PublicationType;";
-    
-                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
-    
+                    //Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors From Authors Group By PublicationType
+                    System.out.println("Enter an SQL query: ");
+                    scan.nextLine();
+                    String query = scan.nextLine(); // Read the SQL query from the user
+
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
                     ResultSet resultSet = preparedStatement.executeQuery();
-    
-                    while(resultSet.next()){
-    
-                        String publicationID = resultSet.getString("PublicationType");
-                        int totalAuthors = resultSet.getInt("TotalAuthors");
-    
-                        System.out.println("PublicationID: " + publicationID + " | Total Authors: " + totalAuthors);
+
+                    // Process and display the results, if any
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+
+                    while(resultSet.next()) {
+                        for (int i = 1; i <= columnCount; i++) {
+                            System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
+                        }
+                        System.out.println(); 
                     }
-    
+
                     continueProgram(connection);
 
                     break;
@@ -403,6 +407,7 @@ public class DatabaseApplication {
                 case 2:
 
                     //The amount of publication types within each topic
+                    //"Select Topic, PublicationType, Count(PublicationType) As Count FROM publication Group By Topic, PublicationType With Rollup Having Topic Is Not Null And PublicationType Is Not Null
                     String query2 = "Select Topic, PublicationType, Count(PublicationType) As Count "
                     + "FROM publication "
                     + "Group By Topic, PublicationType With Rollup "
