@@ -11,7 +11,7 @@ import javax.naming.spi.DirStateFactory.Result;
 
 import com.mysql.cj.protocol.Resultset;
 
-public class DatabaseApplication {
+public class ariahsPart {
 
     static Scanner scan = new Scanner(System.in);
 
@@ -117,9 +117,9 @@ public class DatabaseApplication {
     }
 
     public static Connection databaseConnection() {
-        String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
+        String url = "jdbc:mysql://127.0.0.1:3306/project_cs425?user=root";
         String username = "root";
-        String password = "Master18//";
+        String password = "Gilbert:0529";
         Connection myConnection = null;
 
         try {
@@ -640,8 +640,8 @@ public class DatabaseApplication {
 // case 3- set comparison . create a union on publications and journal articles 
     public static void setComparison(Connection connection){
         try{
-            String query = ("Select * from publication" + "union"+
-            "select * from journalarticle");
+            String query = ("SELECT * FROM publication " + "UNION " + "SELECT * FROM journalarticle");
+
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -657,8 +657,7 @@ public class DatabaseApplication {
             }
             continueProgram(connection); // continue 
 
-        }
-        catch(SQLException e){
+        }catch(SQLException e){
             System.out.println("Error:" + e.getMessage());
             menu(connection); // return to menu
         }
@@ -667,22 +666,23 @@ public class DatabaseApplication {
 // case 8- with clause queries - find average minutes for podcasts
     public static void withQueries(Connection connection){
         try{
-            String withQuery =  "WITH EpisodeStatistics AS ("+
-                "Select" +
-                    "PublcationID," +
-                    "Count(*) AS EpisodeNumber," +
-                    " AVG(duration) AS AvgDuration" +
-                "From" +
-                    "podcastepisode" +
-                "Group BY" +
-                    "publicationID" +
-                    ")" +
-                "select " +
-                    "PublicationID" +
-                    "EpisodeNumber," +
-                    "AvgDuration"+
-                "From" +
-                    "EpisodeStatistics";
+            String withQuery = "WITH EpisodeStatistics AS (" +
+            "SELECT " +
+                "PublicationID, " +
+                "COUNT(*) AS EpisodeNumber, " +
+                "AVG(duration) AS AvgDuration " +
+            "FROM " +
+                "podcastepisode " +
+            "GROUP BY " +
+                "PublicationID " +
+            ")" +
+        "SELECT " +
+            "PublicationID, " +
+            "EpisodeNumber, " +
+            "AvgDuration " +
+        "FROM " +
+            "EpisodeStatistics";
+    
         
         
         
