@@ -335,6 +335,38 @@ public class DatabaseApplication {
 
     public static void setOperation(Connection connection){
 
+        try{
+
+            //intersect
+            //select distinct Topic from conference intersect select distinct Topic from Publication where publicationtype = 'Journal'
+            //Except
+            //select distinct FirstName, LastName from authors except select distinct FirstName, LastName from authors where publicationtype = 'Podcast'
+
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query = scan.nextLine(); 
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+           
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while(resultSet.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
+                }
+                System.out.println(); 
+            }
+
+            continueProgram(connection);
+
+
+        }catch(SQLException e){
+            System.out.println("ERROR: " + e.getMessage());
+            menu(connection);
+        }
        
     }
 
