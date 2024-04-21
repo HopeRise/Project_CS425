@@ -342,18 +342,24 @@ public class DatabaseApplication {
 
         try{
 
-            String query = "Select  PublicationID, Title From publication " 
-            + " Where PublicationID In (Select PublicationID From book)";
+            //Select PublicationID, Title From publication Where PublicationID In (Select PublicationID From book)
+
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query = scan.nextLine(); 
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while(resultSet.next()){
-    
-                int publicationID = resultSet.getInt("PublicationID");
-                String title = resultSet.getString("Title");
+           
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
 
-                System.out.println("PublicationID: " + publicationID + " Title: " + title);
+            while(resultSet.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
+                }
+                System.out.println(); 
             }
 
             continueProgram(connection);
@@ -369,77 +375,33 @@ public class DatabaseApplication {
 
         try{
 
-            int userResponse;
+            //Group by
+            //Total number of authors per publication type
+            //Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors From Authors Group By PublicationType
 
-            System.out.println("Do you want to do:\n1.) Group By\n" + "2.) Rollup\n" + "3.) Cube\n");
+            //Rollup
+             //The amount of publication types within each topic
+            //Select Topic, PublicationType, Count(PublicationType) As Count FROM publication Group By Topic, PublicationType With Rollup Having Topic Is Not Null And PublicationType Is Not Null
 
-            userResponse = scan.nextInt();
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query = scan.nextLine(); 
 
-            switch(userResponse){
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
-                //Group by
-                case 1: 
-                    //Total number of authors per publication type
-                    //Select PublicationType, Count(Distinct AuthorsID) As TotalAuthors From Authors Group By PublicationType
-                    System.out.println("Enter an SQL query: ");
-                    scan.nextLine();
-                    String query = scan.nextLine(); // Read the SQL query from the user
+        
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
 
-                    PreparedStatement preparedStatement = connection.prepareStatement(query);
-                    ResultSet resultSet = preparedStatement.executeQuery();
-
-                    // Process and display the results, if any
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-                    int columnCount = metaData.getColumnCount();
-
-                    while(resultSet.next()) {
-                        for (int i = 1; i <= columnCount; i++) {
-                            System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
-                        }
-                        System.out.println(); 
-                    }
-
-                    continueProgram(connection);
-
-                    break;
-
-                //Rollup
-                case 2:
-
-                    //The amount of publication types within each topic
-                    //"Select Topic, PublicationType, Count(PublicationType) As Count FROM publication Group By Topic, PublicationType With Rollup Having Topic Is Not Null And PublicationType Is Not Null
-                    String query2 = "Select Topic, PublicationType, Count(PublicationType) As Count "
-                    + "FROM publication "
-                    + "Group By Topic, PublicationType With Rollup "
-                    + "Having Topic Is Not Null And PublicationType Is Not Null";
-
-                    PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
-
-                    ResultSet resultSet2 = preparedStatement2.executeQuery();
-
-                    while(resultSet2.next()){
-    
-                        String topic = resultSet2.getString("Topic");
-                        String publicationType = resultSet2.getString("PublicationType");
-                        int count = resultSet2.getInt("Count");
-    
-                        System.out.println("Topic: " + topic + " | Publication Type: " + publicationType + " | Count: " + count);
-                    }
-    
-                    continueProgram(connection);
-
-                    break;
-                    
-                //Cube: would not work for our database
-                case 3:
-
-                    break;
-
-                default:
-                    System.out.println("ERROR: Invalid input");
-                    menu(connection);
-                    break;
+            while(resultSet.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
+                }
+                System.out.println(); 
             }
+
+            continueProgram(connection);
 
         }catch(SQLException e){
             System.out.println("ERROR: " + e.getMessage());
@@ -453,352 +415,155 @@ public class DatabaseApplication {
 
         
             int userResponse;
-
             System.out.println("Do you want to do:\n1.) Ranking\n2.) Windowing");
-
+            scan.nextLine();
             userResponse = scan.nextInt();
-        
-            switch(userResponse){
 
-                //Ranking
-                case 1: 
+            try{
 
-                    int choice;
-                    
-                    System.out.println("Which option do you want to do:\n1.) Rank\n2.) Dense Rank\n3.) Percent Rank\n4.) Cume Dist\n5.) Row Number\n6.) Ntile(n)");
-                    choice = scan.nextInt();
+                switch(userResponse){
 
-                    switch (choice){
-
-                        case 1: 
-                            try{
-                                // Rank the podcast episodes based on the duration of the episode, displaying only the episode name, number, duration and rank
-                                String query1 = "Select Ep_name, Ep_Num, Duration, " +
-                                "Rank() Over (Order By Duration Desc) as duration_rank " +
-                                "From PodcastEpisode";
-
-                                PreparedStatement preparedStatement = connection.prepareStatement(query1);
-                                ResultSet resultSet = preparedStatement.executeQuery();
-
-
-                                while(resultSet.next()) {
-                                    
-                                    String episodeName = resultSet.getString("Ep_name");
-                                    int episodeNumber = resultSet.getInt("Ep_Num");
-                                    int duration = resultSet.getInt("Duration");
-                                    int durationRank = resultSet.getInt("duration_rank");
-
-                                    System.out.println("Episode Name: " + episodeName + " | Episode Number: " + episodeNumber + " | Duration: " + duration + " | Duration Rank: " + durationRank);
-
-                                }
-
-                                continueProgram(connection);
-                            }catch(SQLException e){
-                                System.out.println("ERROR: " + e.getMessage());
-                                menu(connection);
+                    //Ranking
+                    case 1: 
+                        //Rank
+                        // "Select Ep_name, Ep_Num, Duration, Rank() Over (Order By Duration Desc) as duration_rank From PodcastEpisode
+                        //Dense Rank
+                        //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
+                        //"SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks FROM (SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID FROM authorsconference GROUP BY AuthorsID) AS AuthorTotals
+                        //Percent Rank
+                        //"Select *, Rank() Over(Order By TotalPages) as p_rank, Round(Percent_Rank() Over (Order By TotalPages), 2)*100 as p_percent_rank From book
+                        //Cume Dist
+                        //Select *, Round(Round(Cume_Dist() Over (Order By ChapterNumbers), 2)*100, 2) as Cume_Percent From book
+                        //Row Numbers
+                        // Select Row_Number() Over (Order By TotalPages) as row_num,AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher, Rank() Over (Order By TotalPages) As pages_rank From book
+                        //Ntile(n)
+                        //"Select AuthorsID, ConferenceID, NTILE(5) over (order by AuthorsID) AS Group5 From authorsconference
+    
+    
+                        System.out.println("Enter an SQL query: ");
+                        scan.nextLine();
+                        String query = scan.nextLine(); 
+    
+                        PreparedStatement preparedStatement = connection.prepareStatement(query);
+                        ResultSet resultSet = preparedStatement.executeQuery();
+    
+                        ResultSetMetaData metaData = resultSet.getMetaData();
+                        int columnCount = metaData.getColumnCount();
+    
+                        while(resultSet.next()) {
+                            for (int i = 1; i <= columnCount; i++) {
+                                System.out.print(metaData.getColumnName(i) + ": " + resultSet.getObject(i) + " | ");
                             }
-
-                            break;
-                        case 2:
-
-                            try{
-                                 //Rank authorsID by the amount of conference they have done, first being the highest, last being the lowest
-                                String query2 = "SELECT AuthorsID, DENSE_RANK() OVER (ORDER BY TotalConferenceID ASC) as ranks " + 
-                                "FROM ( " + 
-                                "SELECT AuthorsID, SUM(ConferenceID) AS TotalConferenceID " +
-                                "FROM authorsconference " +
-                                "GROUP BY AuthorsID "+
-                                ") AS AuthorTotals";
-    
-                                PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
-    
-                                ResultSet resultSet2 = preparedStatement2.executeQuery();
-    
-                                while(resultSet2.next()) {
-                                    String Auth = resultSet2.getString("AuthorsID");
-                                    double ranks = resultSet2.getDouble("ranks");
-    
-                                    System.out.println("AuthorsID: " + Auth + " | Ranks: " + ranks);
-                                }
-    
-                                continueProgram(connection);
-                            }catch(SQLException e){
-                                System.out.println("ERROR: " + e.getMessage());
-                                menu(connection);
-                            }
-
-                            break;
-                        case 3:
-
-                            try{
-                                String query3 = "Select *, Rank() Over(Order By TotalPages) as p_rank, " +
-                                "Round(Percent_Rank() Over (Order By TotalPages), 2)*100 as p_percent_rank From book";
-
-                                PreparedStatement preparedStatement3 = connection.prepareStatement(query3);
-                                ResultSet resultSet3 = preparedStatement3.executeQuery();
-
-                                while(resultSet3.next()){
-                                    int AID = resultSet3.getInt("AuthorsID");
-                                    int PID = resultSet3.getInt("PublicationID");
-                                    int totalPages = resultSet3.getInt("TotalPages");
-                                    int chapterNumbers = resultSet3.getInt("ChapterNumbers");
-                                    String publisher = resultSet3.getString("Publisher");
-                                    double p_rank = resultSet3.getDouble("p_rank");
-                                    int p_PercentRank = resultSet3.getInt("p_percent_rank");
-
-                                    System.out.println("AuthorsID: " + AID + " | PublicationID: " + PID + " | Total Pages: " + totalPages + " | Chapter Numbers: " + chapterNumbers + " | Publisher: " + publisher + " | Rank: " + p_rank + " | Percent Rank: " + p_PercentRank);
-                                    
-                                }
-
-                                continueProgram(connection);
-                                
-                            }catch(SQLException e){
-                                System.out.println("ERROR: " + e.getMessage());
-                                menu(connection);
-                            }
-
-                            break;
-                        case 4:
-
-                        try{
-                            String query4 = "Select *, Round(Round(Cume_Dist() Over (Order By ChapterNumbers), 2)*100, 2) as Cume_Percent From book";
-
-                            PreparedStatement preparedStatement4 = connection.prepareStatement(query4);
-                            ResultSet resultSet4 = preparedStatement4.executeQuery();
-
-                            while(resultSet4.next()){
-                                int AuthorsID = resultSet4.getInt("AuthorsID");
-                                int PublicationID = resultSet4.getInt("PublicationID");
-                                int pages = resultSet4.getInt("TotalPages");
-                                int chapters = resultSet4.getInt("ChapterNumbers");
-                                String publisher = resultSet4.getString("Publisher");
-                                int cumeDistPercent = resultSet4.getInt("Cume_Percent");
-
-                                System.out.println("AuthorsID: " + AuthorsID + " | PublicationID: " + PublicationID + " | Total Pages: " + pages + " | Chapter Numbers: " + chapters + " | Publisher: " + publisher + " | Cume Dist Percent: " + cumeDistPercent);
-                                
-                            }
-
-                            continueProgram(connection);
-                            
-                        }catch(SQLException e){
-                            System.out.println("ERROR: " + e.getMessage());
-                            menu(connection);
+                            System.out.println(); 
                         }
-
-                            break;
-                        case 5:
-
-                            try{
-
-                                String query5 = "Select Row_Number() Over (Order By TotalPages) as row_num, "
-                                + "AuthorsID, PublicationID, TotalPages, ChapterNumbers, Publisher, Rank() Over (Order By TotalPages) As pages_rank "+
-                                "From book";
-
-                                PreparedStatement preparedStatement5 = connection.prepareStatement(query5);
-                                ResultSet resultSet5 = preparedStatement5.executeQuery();
-
-                                while(resultSet5.next()){
-
-                                    int rowNumber = resultSet5.getInt("row_num");
-                                    int authorsID = resultSet5.getInt("AuthorsID");
-                                    int publicationID = resultSet5.getInt("PublicationID");
-                                    int totPages = resultSet5.getInt("TotalPages");
-                                    int chapterAmount = resultSet5.getInt("ChapterNumbers");
-                                    String Publisher = resultSet5.getString("Publisher");
-                                    int rank = resultSet5.getInt("pages_rank");
-
-                                    System.out.println("Row Number: " + rowNumber + " | AuthorsID: " + authorsID + " | PublicationID: " + publicationID + " | Total Pages: " + totPages + " | Chapter Numbers: " + chapterAmount + " | Publisher: " + Publisher + " | Rank: " + rank);
-
-                                }
-
-                                continueProgram(connection);
-
-
-                            }catch(SQLException e){
-                                System.out.println("ERROR: " + e.getMessage());
-                                menu(connection);
-                            }
-
-
-                            break;
-                        case 6:
-                            
-                            try{
-
-                                String query6 = "Select AuthorsID, ConferenceID," +
-                                "NTILE(5) over (order by AuthorsID) AS Group5 " +
-                                "From authorsconference";
-
-                                PreparedStatement preparedStatement6 = connection.prepareStatement(query6);
-                                ResultSet resultSet6 = preparedStatement6.executeQuery();
-
-
-                                while(resultSet6.next()) {
-                                    
-                                    int authorsID = resultSet6.getInt("AuthorsID");
-                                    int conferenceID = resultSet6.getInt("ConferenceID");
-                                    int ntile = resultSet6.getInt("Group5");
-
-                                    System.out.println("AuthorsID: " + authorsID + " | ConferenceID: " + conferenceID + " | Ntile(5): " + ntile);
-                                    
-                                }
     
-                                continueProgram(connection);
-
-                            }catch(SQLException e){
-                                System.out.println("ERROR: " + e.getMessage());
-                                menu(connection);
-                            }    
-
-                            break;
-                        default:
-                            System.out.println("ERROR: Invalid input");
-                            menu(connection);
-                    }
-                    
-                    break;
-                
-                //Windowing
-                case 2: 
-
-                    int choice2;    
-                    System.out.println("Which option do you want to do:\n1.) Moving Averages\n2.) Running Sum/Totals");
-                    choice2 = scan.nextInt();
-
-                    //Moving Averages
-                    if(choice2 == 1){
+                        continueProgram(connection);
                         
-                        try{
-                            //Average amount of page and chapter numbers within each publisher
-                            String query2 = "SELECT Publisher, " + 
-                            "ROUND(AVG(TotalPages), 2) AS AvgPage, ROUND(AVG(ChapterNumbers), 2) AS AvgChapter " + 
-                            "FROM book " +
-                            "GROUP BY Publisher";
-        
-                            PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
-        
-                            ResultSet resultSet2 = preparedStatement2.executeQuery();
-        
-                            while(resultSet2.next()) {
-                                String publisher = resultSet2.getString("Publisher");
-                                double avgPage = resultSet2.getDouble("AvgPage");
-                                double avgChapter = resultSet2.getDouble("AvgChapter");
-        
-                                System.out.println("Publisher: " + publisher + " | AvgPage: " + avgPage + " | AvgChapter: " + avgChapter);
+                        break;
+                    
+                    //Windowing
+                    case 2: 
+    
+                        //Moving averages
+                        //"SELECT Publisher, ROUND(AVG(TotalPages), 2) AS AvgPage, ROUND(AVG(ChapterNumbers), 2) AS AvgChapter FROM book GROUP BY Publisher"
+                        //Running sum/totals
+                        //Select Ep_num, Count(*) As episodes_count,Sum(Count(*)) Over (Order By Ep_num) As running_total From podcastepisode Group By Ep_num Order By Ep_num";
+    
+                        System.out.println("Enter an SQL query: ");
+                        scan.nextLine();
+                        String query2 = scan.nextLine(); 
+    
+                        PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+                        ResultSet resultSet2 = preparedStatement2.executeQuery();
+    
+                        ResultSetMetaData metaData2 = resultSet2.getMetaData();
+                        int columnCount2 = metaData2.getColumnCount();
+    
+                        while(resultSet2.next()) {
+                            for (int i = 1; i <= columnCount2; i++) {
+                                System.out.print(metaData2.getColumnName(i) + ": " + resultSet2.getObject(i) + " | ");
                             }
-        
-                            continueProgram(connection);
-
-                        }catch(SQLException e){
-                            System.out.println("ERROR: " + e.getMessage());
-                            menu(connection);
+                            System.out.println(); 
                         }
-                  
-                    //Running Sum/Totals
-                    }else if (choice2 == 2){
-                        
-                        try{
-
-                            String query2 = "Select Ep_num, Count(*) As episodes_count, "
-                            + "Sum(Count(*)) Over (Order By Ep_num) As running_total From podcastepisode "
-                            + "Group By Ep_num "
-                            + "Order By Ep_num";
-
-                            PreparedStatement preparedStatement3 = connection.prepareStatement(query2);
-                            ResultSet resultSet3 = preparedStatement3.executeQuery();
-
-                            while(resultSet3.next()) {
-                                
-                                int episodeNumber = resultSet3.getInt("Ep_num");
-                                int episodeCount = resultSet3.getInt("episodes_count");
-                                int runningTotal = resultSet3.getInt("running_total");
-
-                                System.out.println("Episode Number: " + episodeNumber + " | Episodes Count: " + episodeCount + " | Running Total: " + runningTotal);
-
-                            }
-        
-                            continueProgram(connection);
-
-                        }catch(SQLException e){
-                            System.out.println("ERROR: " + e.getMessage());
-                            menu(connection);
-                        }
-                    }
-                    else{
+    
+                        continueProgram(connection);
+    
+                        break;
+                    default:
                         System.out.println("ERROR: Invalid input");
                         menu(connection);
-                    }
+                        break;
+                }
 
-                    break;
-                default:
-                    System.out.println("ERROR: Invalid input");
-                    menu(connection);
-                    break;
+            }catch(SQLException e){
+                System.out.println("ERROR: " + e.getMessage());
+                menu(connection);
             }
+            
+            
        
     }
 
     public static void setComparison(Connection connection){
+
+
         try{
-            String query = ("SELECT * FROM publication " + "UNION " + "SELECT * FROM journalarticle");
 
+            //Select * From publication Union Select * From journalarticle
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query2 = scan.nextLine(); 
 
-            while(resultSet.next()){
-                int publicationID = resultSet.getInt("PublicationID");
-                String title = resultSet.getString("Title");
-                String topic = resultSet.getString("Topic");
-                String date = resultSet.getString("Date");
-                String publicationType = resultSet.getString("PublicationType");
+            PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+            ResultSet resultSet2 = preparedStatement2.executeQuery();
 
-                System.out.println("PublicationID: " + publicationID + " | Title: " + title + " | Topic: " + topic + " | Date: " + date + " | Publication Type: " + publicationType);
+            ResultSetMetaData metaData2 = resultSet2.getMetaData();
+            int columnCount2 = metaData2.getColumnCount();
+
+            while(resultSet2.next()) {
+                for (int i = 1; i <= columnCount2; i++) {
+                    System.out.print(metaData2.getColumnName(i) + ": " + resultSet2.getObject(i) + " | ");
+                }
+                System.out.println(); 
             }
-            continueProgram(connection); // continue 
+
+            continueProgram(connection);
 
         }catch(SQLException e){
             System.out.println("Error:" + e.getMessage());
-            menu(connection); // return to menu
+            menu(connection); 
         }
 
     }
 
     public static void withQueries(Connection connection){
+
         try{
-            String withQuery = "WITH EpisodeStatistics AS (" +
-            "SELECT " +
-                "PublicationID, " +
-                "COUNT(*) AS EpisodeNumber, " +
-                "AVG(duration) AS AvgDuration " +
-            "FROM " +
-                "podcastepisode " +
-            "GROUP BY " +
-                "PublicationID " +
-            ")" +
-        "SELECT " +
-            "PublicationID, " +
-            "EpisodeNumber, " +
-            "AvgDuration " +
-        "FROM " +
-            "EpisodeStatistics";
-    
-        PreparedStatement preparedStatement = connection.prepareStatement(withQuery);
-        ResultSet resultSet= preparedStatement.executeQuery();
+            //With EpisodeStatistics As (Select PublicationID, Count(*) As EpisodeNumber, Avg(Duration) as AvgDuration From podcastepisode Group By PublicationID) Select PublicationID, EpisodeNumber, AvgDuration From EpisodeStatistics
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query2 = scan.nextLine(); 
 
-        while(resultSet.next()){
-            int publcationID = resultSet.getInt("PublicationID");
-            int episodeNumber = resultSet.getInt("EpisodeNumber");
-            double avgDuration = resultSet.getDouble("AvgDuration");
+            PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+            ResultSet resultSet2 = preparedStatement2.executeQuery();
 
-            System.out.println("PublcationID:" + publcationID + ",EpisodeNumber:" + episodeNumber + ", AvgDuration" + avgDuration); // output result    
-        }
-        continueProgram(connection); // continue 
+            ResultSetMetaData metaData2 = resultSet2.getMetaData();
+            int columnCount2 = metaData2.getColumnCount();
+
+            while(resultSet2.next()) {
+                for (int i = 1; i <= columnCount2; i++) {
+                    System.out.print(metaData2.getColumnName(i) + ": " + resultSet2.getObject(i) + " | ");
+                }
+                System.out.println(); 
+            }
+
+            continueProgram(connection);
 
     }
     catch(SQLException e){
         System.out.println("Error:" + e.getMessage());
-        menu(connection); // return to menu
+        menu(connection); 
     }
 
     }
