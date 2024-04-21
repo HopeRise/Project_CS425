@@ -290,12 +290,12 @@ public class DatabaseApplication {
 
         try {
 
-            String mySQLStatement = "Update podcastepisode Set Duration = ? Where PublicationID = ?";
+            //"Update podcastepisode Set Duration = ? Where PublicationID = ?";
+            System.out.println("Enter an SQL Query: ");
+            scan.nextLine();
+            String mySQLStatement = scan.nextLine();
 
             PreparedStatement preparedStatement = connection.prepareStatement(mySQLStatement);
-
-            preparedStatement.setInt(1, 50);
-            preparedStatement.setInt(2, 105);
 
             int rowsAffeccted = preparedStatement.executeUpdate();
 
@@ -313,10 +313,11 @@ public class DatabaseApplication {
         
         try{
 
-            String query = "Delete From book Where PublicationID = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            System.out.println("Enter an SQL query: ");
+            scan.nextLine();
+            String query = scan.nextLine();
 
-            preparedStatement.setInt(1, 128);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
 
             int rowsAffeccted = preparedStatement.executeUpdate();
 
