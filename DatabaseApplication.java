@@ -117,9 +117,9 @@ public class DatabaseApplication {
     }
 
     public static Connection databaseConnection() {
-        String url = "jdbc:mysql://localhost:3306/IEEE_Database2?user=root";
+        String url = "jdbc:mysql://127.0.0.1:3306/project_cs425?user=root";
         String username = "root";
-        String password = "Master18//";
+        String password = "Gilbert:0529";
         Connection myConnection = null;
 
         try {
@@ -733,10 +733,67 @@ public class DatabaseApplication {
     }
 
     public static void setComparison(Connection connection){
+        try{
+            String query = ("SELECT * FROM publication " + "UNION " + "SELECT * FROM journalarticle");
+
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                int publicationID = resultSet.getInt("PublicationID");
+                String title = resultSet.getString("Title");
+                String topic = resultSet.getString("Topic");
+                String date = resultSet.getString("Date");
+                String publicationType = resultSet.getString("PublicationType");
+
+                System.out.println("PublicationID: " + publicationID + " | Title: " + title + " | Topic: " + topic + " | Date: " + date + " | Publication Type: " + publicationType);
+            }
+            continueProgram(connection); // continue 
+
+        }catch(SQLException e){
+            System.out.println("Error:" + e.getMessage());
+            menu(connection); // return to menu
+        }
 
     }
 
     public static void withQueries(Connection connection){
+        try{
+            String withQuery = "WITH EpisodeStatistics AS (" +
+            "SELECT " +
+                "PublicationID, " +
+                "COUNT(*) AS EpisodeNumber, " +
+                "AVG(duration) AS AvgDuration " +
+            "FROM " +
+                "podcastepisode " +
+            "GROUP BY " +
+                "PublicationID " +
+            ")" +
+        "SELECT " +
+            "PublicationID, " +
+            "EpisodeNumber, " +
+            "AvgDuration " +
+        "FROM " +
+            "EpisodeStatistics";
+    
+        PreparedStatement preparedStatement = connection.prepareStatement(withQuery);
+        ResultSet resultSet= preparedStatement.executeQuery();
+
+        while(resultSet.next()){
+            int publcationID = resultSet.getInt("PublicationID");
+            int episodeNumber = resultSet.getInt("EpisodeNumber");
+            double avgDuration = resultSet.getDouble("AvgDuration");
+
+            System.out.println("PublcationID:" + publcationID + ",EpisodeNumber:" + episodeNumber + ", AvgDuration" + avgDuration); // output result    
+        }
+        continueProgram(connection); // continue 
+
+    }
+    catch(SQLException e){
+        System.out.println("Error:" + e.getMessage());
+        menu(connection); // return to menu
+    }
 
     }
 }
